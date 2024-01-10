@@ -56,11 +56,11 @@ if (!function_exists('debug')) {
      */
     function debug($var, ...$moreVars)
     {
-        if (config('app.debug') && Context::has('IsInRequestEvent') && $swResponse = \response()->getSwooleResponse()) {
+        if (config('debugger.debug') && Context::has('IsInRequestEvent') && $swResponse = \response()->getSwooleResponse()) {
             Context::set('hasWriteContent', true);
             $cloner = new VarCloner();
             $dumper = new HtmlDumper();
-            $dumper->setTheme(config('app.debug_theme', 'dark'));
+            $dumper->setTheme(config('debugger.debug_theme', 'dark'));
             $output = fopen('php://memory', 'r+b');
             $dumper->dump($cloner->cloneVar($var)->withContext([SourceContextProvider::class => (new SourceContextProvider)->getContext()]), $output, [
                 'fileLinkFormat' => "file://%f#L%l"
