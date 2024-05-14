@@ -45,6 +45,7 @@ if (!function_exists('dd')) {
         foreach ($vars as $v) {
             VarDumper::dump($v);
         }
+        throw new \Mini\Exception\DdException();
     }
 }
 
@@ -75,5 +76,17 @@ if (!function_exists('debug')) {
             $swResponse->header('Server', 'Mini', true);
             $swResponse->write(new SwooleStream($output));
         }
+    }
+}
+
+if (!function_exists('pp')) {
+    /**
+     * @param $var
+     * @param array $moreVars
+     */
+    function pp($var, ...$moreVars)
+    {
+        debug($var, ...$moreVars);
+        throw new \Mini\Exception\DdException();
     }
 }
