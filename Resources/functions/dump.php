@@ -86,7 +86,25 @@ if (!function_exists('pp')) {
      */
     function pp($var, ...$moreVars)
     {
-        debug($var, ...$moreVars);
+        if (config('debugger.debug') && Context::has('IsInRequestEvent') && $swResponse = \response()->getSwooleResponse()) {
+            Context::set('hasWriteContent', true);
+            $cloner = new VarCloner();
+            $dumper = new HtmlDumper();
+            $dumper->setTheme(config('debugger.debug_theme', 'dark'));
+            $output = fopen('php://memory', 'r+b');
+            $dumper->dump($cloner->cloneVar($var)->withContext([SourceContextProvider::class => (new SourceContextProvider)->getContext()]), $output, [
+                'fileLinkFormat' => "file://%f#L%l"
+            ]);
+            foreach ($moreVars as $moreVar) {
+                $dumper->dump($cloner->cloneVar($moreVar)->withContext([SourceContextProvider::class => (new SourceContextProvider)->getContext()]), $output, [
+                    'fileLinkFormat' => "file://%f#L%l"
+                ]);
+            }
+            $output = stream_get_contents($output, -1, 0);
+            $swResponse->header('content-type', 'text/html;charset=UTF-8', true);
+            $swResponse->header('Server', 'Mini', true);
+            $swResponse->write(new SwooleStream($output));
+        }
         throw new \Mini\Exception\DdException();
     }
 }
